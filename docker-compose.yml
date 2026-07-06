@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: boostaurant
+      POSTGRES_USER: boostaurant
+      POSTGRES_PASSWORD: boostaurant
+    ports:
+      - "5432:5432"
+    volumes:
+      # schema.sql выполняется автоматически при первой инициализации БД
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boostaurant -d boostaurant"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://boostaurant:boostaurant@db:5432/boostaurant
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      # монтируем код внутрь — правки без пересборки образа
+      - ./:/app
+    # по умолчанию поднимаем API; генерацию/обучение запускаем через
+    # docker compose exec app python -m data_gen.generate  и т.п.
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
