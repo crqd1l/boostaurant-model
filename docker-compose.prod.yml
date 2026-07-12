@@ -1,0 +1,69 @@
+# Production-конфиг. Самодостаточный: запускается БЕЗ базового docker-compose.yml.
+#
+#   docker compose -f docker-compose.prod.yml --profile bot up -d
+#
+# Почему не оверлей поверх docker-compose.yml: compose ОБЪЕДИНЯЕТ списки volumes,
+# а не заменяет их. `volumes: []` в оверлее не убирает `./:/app` из базового
+# файла — на сервере это смонтировало бы несуществующий локальный путь поверх
+# кода в образе. Проверено: в merged-конфиге том оставался.
+#
+# Отличия от локального:
+#   - код НЕ монтируется: берётся из образа (нет --reload, правки требуют пересборки)
+#   - НИЧЕГО не торчит наружу: ни postgres, ни API
+#   - все сервисы перезапускаются сами
+#
+# Почему API не проброшен наружу. Публичный IP нужен только чтобы ходить в API
+# с локали — самому приложению он не нужен:
+#   - бот работает через long polling: сам стучится к api.telegram.org и
+#     входящих соединений не принимает (вебхуки выключены в bot/main.py);
+#   - API вызывает только бот, изнутри docker-сети, по http://app:8000.
+# А для curl и /docs с локали хватает ssh-туннеля (./deploy.sh --tunnel).
+# Это ещё и безопаснее: у API нет ни авторизации, ни rate-limit, и открытый
+# 8000 означал бы, что POST /retrain может дёрнуть любой, кто просканит порт.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: boostaurant
+      POSTGRES_USER: boostaurant
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-boostaurant}
+    volumes:
+      # schema.sql применяется автоматически при ПЕРВОЙ инициализации БД
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boostaurant -d boostaurant"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://boostaurant:${POSTGRES_PASSWORD:-boostaurant}@db:5432/boostaurant
+    depends_on:
+      db:
+        condition: service_healthy
+    # 127.0.0.1 — порт слушается ТОЛЬКО на localhost сервера, наружу не выставлен.
+    # Изнутри docker-сети бот всё равно достучится (http://app:8000), а мы с
+    # локали — через ssh-туннель.
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+  bot:
+    build: .
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN:-}
+      API_URL: http://app:8000
+    depends_on:
+      - app
+    profiles: ["bot"]
+    restart: unless-stopped
+    command: python -m bot.main
+
+volumes:
+  pgdata:

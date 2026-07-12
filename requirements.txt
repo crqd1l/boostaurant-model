@@ -1,0 +1,17 @@
+# numpy держим на 1.x: scikit-surprise 1.1.4 компилируется против numpy C-API 1.x
+# и с numpy 2.x падает на импорте ("numpy.core.multiarray failed to import").
+# scipy 1.13 — последняя ветка, совместимая с numpy 1.26.
+numpy==1.26.4
+scipy==1.13.1
+
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.36
+pandas==2.2.3
+scikit-learn==1.5.2
+scikit-surprise==1.1.4
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Telegram-бот официанта.
+# aiohttp не пиним: aiogram 3.15 требует aiohttp<3.11 и тянет совместимую версию сам.
+aiogram==3.15.0
