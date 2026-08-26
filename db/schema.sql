@@ -23,7 +23,6 @@ CREATE TABLE menu_items (
 CREATE TABLE customers (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phone             TEXT UNIQUE,               -- ключ идентификации гостя (iiko phone)
-    gender            SMALLINT,                  -- iiko sex enum: 0/1/2, nullable
     birthday          DATE,                      -- nullable
     loyalty_tier      TEXT,                      -- iiko categories → сегмент лояльности
     first_order_date  DATE,                      -- давность клиента (iiko firstOrderDate)

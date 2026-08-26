@@ -13,8 +13,6 @@ SOURCE_LABEL = {
     "popularity": "популярное в зале",      # о госте не знаем ничего
 }
 
-GENDER = {0: "", 1: "М", 2: "Ж"}
-
 # Обратный перевод тегов в человеческие слова: в БД они лежат по-английски,
 # потому что совпадают с menu_items.tags.
 TAG_RU = {
@@ -54,10 +52,8 @@ def format_profile(p: dict) -> str:
     if p.get("phone"):
         lines.append(f"📞 {p['phone']}")
 
-    demo = [x for x in (GENDER.get(p.get("gender") or 0),
-                        f"{p['age']} лет" if p.get("age") else None) if x]
-    if demo:
-        lines.append("🎂 " + " · ".join(demo))
+    if p.get("age"):
+        lines.append(f"🎂 {p['age']} лет")
 
     if p.get("loyalty_tier"):
         lines.append(f"🏅 Лояльность: <b>{p['loyalty_tier']}</b>")

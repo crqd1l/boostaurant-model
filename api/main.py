@@ -59,7 +59,6 @@ class Favorite(BaseModel):
 class Profile(BaseModel):
     customer_id: str
     phone: str | None = None
-    gender: int | None = None
     age: int | None = None
     birthday: date | None = None
     loyalty_tier: str | None = None

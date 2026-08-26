@@ -1,0 +1,44 @@
+// Поток A: идентификация гостя по номеру столика — Рисунок для раздела 1.4
+digraph flow {
+    graph [rankdir=TB, splines=polyline, nodesep=0.4, ranksep=0.45, bgcolor="white",
+           fontname="Helvetica"];
+    node  [fontname="Helvetica", fontsize=10.5, shape=box, style="rounded,filled",
+           penwidth=1.1, margin="0.18,0.10"];
+    edge  [fontname="Helvetica", fontsize=9, color="#555555", penwidth=1.1];
+
+    start [label="Официант вводит\nномер столика", fillcolor="#FDF0D5", color="#D9A441"];
+
+    sections [label="iiko: /reserve/available_restaurant_sections\nномер столика → идентификатор столика",
+              fillcolor="#EDEDED", color="#999999"];
+
+    bytable  [label="iiko: /order/by_table\nесть активный заказ за столиком?",
+              shape=diamond, style=filled, fillcolor="#FFFFFF", color="#7A9CC6",
+              margin="0.02,0.02"];
+
+    reserve  [label="iiko: /reserve/restaurant_sections_workload\nбронь на этот столик",
+              fillcolor="#EDEDED", color="#999999"];
+
+    phone    [label="телефон гостя", fillcolor="#E8EEF7", color="#7A9CC6"];
+
+    info     [label="iiko: /loyalty/iiko/customer/info\nтелефон → идентификатор гостя",
+              fillcolor="#EDEDED", color="#999999"];
+
+    indb     [label="гость есть в нашей базе?", shape=diamond, style=filled,
+              fillcolor="#FFFFFF", color="#7A9CC6", margin="0.02,0.02"];
+
+    rec      [label="рекомендательное ядро\n(персональные рекомендации)",
+              fillcolor="#F5D9A8", color="#D9A441"];
+    pop      [label="популярные блюда\nза 30 дней", fillcolor="#F5D9A8", color="#D9A441"];
+    empty    [label="столик свободен", fillcolor="#F2F2F2", color="#AAAAAA"];
+
+    start -> sections;
+    sections -> bytable;
+    bytable -> phone   [label="  да"];
+    bytable -> reserve [label="  нет"];
+    reserve -> phone   [label="  бронь найдена"];
+    reserve -> empty   [label="  брони нет"];
+    phone -> info;
+    info -> indb;
+    indb -> rec [label="  да"];
+    indb -> pop [label="  нет"];
+}

@@ -1,0 +1,70 @@
+// ER-диаграмма БД Boostaurant — Рисунок для раздела 1.2
+digraph schema {
+    graph [rankdir=LR, splines=ortho, nodesep=0.55, ranksep=1.0, bgcolor="white", fontname="Helvetica"];
+    node  [shape=plaintext, fontname="Helvetica"];
+    edge  [color="#555555", arrowhead=none, penwidth=1.1, fontname="Helvetica", fontsize=10];
+
+    menu_items [label=<
+      <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD BGCOLOR="#E8EEF7" COLSPAN="2"><B>menu_items</B><BR/><FONT POINT-SIZE="9">справочник блюд</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT"><B>id</B></TD><TD ALIGN="LEFT">UUID, PK</TD></TR>
+        <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+        <TR><TD ALIGN="LEFT">category</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+        <TR><TD ALIGN="LEFT">price</TD><TD ALIGN="LEFT">NUMERIC</TD></TR>
+        <TR><TD ALIGN="LEFT">tags</TD><TD ALIGN="LEFT">TEXT[]</TD></TR>
+        <TR><TD ALIGN="LEFT">is_active</TD><TD ALIGN="LEFT">BOOLEAN</TD></TR>
+        <TR><TD BGCOLOR="#F7F7F7" COLSPAN="2"><FONT POINT-SIZE="8">iiko: /nomenclature</FONT></TD></TR>
+      </TABLE>>];
+
+    customers [label=<
+      <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD BGCOLOR="#E8EEF7" COLSPAN="2"><B>customers</B><BR/><FONT POINT-SIZE="9">профиль гостя</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT"><B>id</B></TD><TD ALIGN="LEFT">UUID, PK</TD></TR>
+        <TR><TD ALIGN="LEFT">phone</TD><TD ALIGN="LEFT">TEXT, UNIQUE</TD></TR>
+        <TR><TD ALIGN="LEFT">birthday</TD><TD ALIGN="LEFT">DATE</TD></TR>
+        <TR><TD ALIGN="LEFT">loyalty_tier</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+        <TR><TD ALIGN="LEFT">first_order_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+        <TR><TD ALIGN="LEFT">registered_at</TD><TD ALIGN="LEFT">TIMESTAMPTZ</TD></TR>
+        <TR><TD ALIGN="LEFT"><FONT COLOR="#888888">archetype</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#888888">TEXT, служ.</FONT></TD></TR>
+        <TR><TD BGCOLOR="#F7F7F7" COLSPAN="2"><FONT POINT-SIZE="8">iiko: /loyalty/iiko/customer/info</FONT></TD></TR>
+      </TABLE>>];
+
+    orders [label=<
+      <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD BGCOLOR="#E8EEF7" COLSPAN="2"><B>orders</B><BR/><FONT POINT-SIZE="9">заказ (заголовок)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT"><B>id</B></TD><TD ALIGN="LEFT">UUID, PK</TD></TR>
+        <TR><TD ALIGN="LEFT"><I>customer_id</I></TD><TD ALIGN="LEFT">UUID, FK</TD></TR>
+        <TR><TD ALIGN="LEFT">created_at</TD><TD ALIGN="LEFT">TIMESTAMPTZ</TD></TR>
+        <TR><TD ALIGN="LEFT">total_sum</TD><TD ALIGN="LEFT">NUMERIC</TD></TR>
+        <TR><TD ALIGN="LEFT">table_number</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+        <TR><TD BGCOLOR="#F7F7F7" COLSPAN="2"><FONT POINT-SIZE="8">iiko: /order/by_id</FONT></TD></TR>
+      </TABLE>>];
+
+    order_items [label=<
+      <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD BGCOLOR="#F5D9A8" COLSPAN="2"><B>order_items</B><BR/><FONT POINT-SIZE="9">позиции заказа</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT"><B>id</B></TD><TD ALIGN="LEFT">UUID, PK</TD></TR>
+        <TR><TD ALIGN="LEFT"><I>order_id</I></TD><TD ALIGN="LEFT">UUID, FK</TD></TR>
+        <TR><TD ALIGN="LEFT"><I>menu_item_id</I></TD><TD ALIGN="LEFT">UUID, FK</TD></TR>
+        <TR><TD ALIGN="LEFT">quantity</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+        <TR><TD ALIGN="LEFT">price</TD><TD ALIGN="LEFT">NUMERIC</TD></TR>
+        <TR><TD BGCOLOR="#FBEFD8" COLSPAN="2"><FONT POINT-SIZE="8"><B>матрица взаимодействий для ML</B></FONT></TD></TR>
+      </TABLE>>];
+
+    customer_preferences [label=<
+      <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD BGCOLOR="#DCEBDC" COLSPAN="2"><B>customer_preferences</B><BR/><FONT POINT-SIZE="9">предпочтения гостя</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT"><B><I>customer_id</I></B></TD><TD ALIGN="LEFT">UUID, PK, FK</TD></TR>
+        <TR><TD ALIGN="LEFT">allergens</TD><TD ALIGN="LEFT">TEXT[]</TD></TR>
+        <TR><TD ALIGN="LEFT">dislikes</TD><TD ALIGN="LEFT">TEXT[]</TD></TR>
+        <TR><TD ALIGN="LEFT">note</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+        <TR><TD ALIGN="LEFT">updated_at</TD><TD ALIGN="LEFT">TIMESTAMPTZ</TD></TR>
+        <TR><TD BGCOLOR="#EDF5ED" COLSPAN="2"><FONT POINT-SIZE="8">источник: официант (бот)</FONT></TD></TR>
+      </TABLE>>];
+
+    customers -> customer_preferences [taillabel="1", headlabel="0..1", labeldistance=2.0, labelangle=18];
+    customers -> orders                [taillabel="1", headlabel="N",    labeldistance=2.0, labelangle=18];
+    orders    -> order_items           [taillabel="1", headlabel="N",    labeldistance=2.0, labelangle=18];
+    menu_items -> order_items          [taillabel="1", headlabel="N",    labeldistance=2.0, labelangle=-18];
+
+}

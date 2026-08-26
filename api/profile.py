@@ -16,7 +16,6 @@ from db.connection import get_engine
 PROFILE_SQL = """
     SELECT c.id::text                                   AS customer_id,
            c.phone                                      AS phone,
-           c.gender                                     AS gender,
            c.birthday                                   AS birthday,
            c.loyalty_tier                               AS loyalty_tier,
            c.first_order_date                           AS first_order_date,
@@ -88,7 +87,6 @@ def get_profile(customer_id: str, favorites: int = 3) -> dict | None:
     return {
         "customer_id": row["customer_id"],
         "phone": row["phone"],
-        "gender": row["gender"],
         "age": _age(row["birthday"]),
         "birthday": row["birthday"],
         "loyalty_tier": row["loyalty_tier"],

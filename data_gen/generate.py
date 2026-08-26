@@ -78,7 +78,6 @@ def make_customer(rnd: random.Random, today: date) -> dict:
     return {
         "id": uuid.uuid4(),
         "phone": f"+79{rnd.randint(100000000, 999999999)}",
-        "gender": rnd.choice([0, 1, 2]),
         "birthday": date(rnd.randint(1965, 2005), rnd.randint(1, 12), rnd.randint(1, 28)),
         "loyalty_tier": weighted_choice(rnd, tier_pool),
         "first_order_date": first_order,
@@ -207,8 +206,8 @@ def main() -> None:
         customers = [make_customer(rnd, today) for _ in range(args.customers)]
         conn.execute(
             text(
-                "INSERT INTO customers (id, phone, gender, birthday, loyalty_tier, "
-                "first_order_date, registered_at, archetype) VALUES (:id, :phone, :gender, "
+                "INSERT INTO customers (id, phone, birthday, loyalty_tier, "
+                "first_order_date, registered_at, archetype) VALUES (:id, :phone, "
                 ":birthday, :loyalty_tier, :first_order_date, :registered_at, :archetype)"
             ),
             [{k: v for k, v in c.items() if not k.startswith("_")} for c in customers],
