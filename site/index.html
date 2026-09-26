@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boostaurant — ИИ-ассистент официанта</title>
+<meta name="description" content="Boostaurant подсказывает официанту, что предложить именно этому гостю: по номеру столика — любимые блюда, аллергии, уровень лояльности и топ-5 персональных рекомендаций.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/img/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tick" viewBox="0 0 32 32"><path fill="currentColor" d="M.45 14.26c4.33 4.93 8.96 9.56 13.28 14.59.4.5 1.31.3 1.61-.2C20.47 20.2 25.5 11.74 30.44 3.09c.7-1.21-.5-2.11-1.31-.9C25.08 8.4 22.59 12.2 20.74 15.07c-2.56 3.95-3.9 6.09-6.5 10.3-.42-.36-.78-.82-1.17-1.21-.97-.99-1.95-1.95-2.95-2.88C7.26 18.6 4.31 16.1 1.15 13.45c-.4-.4-1.1.3-.7.81z"/></symbol>
+  <symbol id="circle-check" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" d="M16 31c8.28 0 15-6.72 15-15S24.28 1 16 1 1 7.72 1 16s6.72 15 15 15zm8.71-19.44-1.49-1.43-9.58 10.02-4.41-4.41-1.46 1.46 5.9 5.9 11.04-11.54z"/></symbol>
+</svg>
+
+<!-- 1. Обложка -->
+<header class="hero">
+  <div class="hero__card">
+    <div class="hero__inner">
+      <h1>Цифровая платформа предиктивной персонализации клиентского обслуживания в общепите</h1>
+      <p>Boostaurant подсказывает официанту, что предложить именно этому гостю: по номеру столика — его любимые блюда, аллергии, уровень лояльности и топ-5 персональных рекомендаций. Прямо в Telegram, за 5 секунд.</p>
+      <a class="btn" href="https://t.me/Igor_Grichanov" target="_blank" rel="noopener">Написать основателю в Telegram</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- 2. Проблема -->
+<section class="section">
+  <div class="wrap">
+    <h2>Ресторан знает о госте всё. Официант — ничего</h2>
+    <div class="checks">
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>В вашей iiko лежит вся история гостя</b><span>Что заказывал, как часто приходит, сколько оставляет. Эти данные видит менеджер в отчёте. В конце месяца.</span></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>Официант при обслуживании видит незнакомого человека</b><span>И предлагает то, что предлагает всем: «У нас сегодня хорошая рыба».</span></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>Разница между этими двумя картинами — ваша недополученная выручка</b><span>Каждый вечер.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Как это работает -->
+<section class="section section--dark">
+  <div class="wrap">
+    <h2>Три кнопки в Telegram. Больше ничего</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step__num">1</div>
+        <b>Официант вводит номер столика</b>
+        <p>Система сама находит гостя — через iiko, по активному заказу или брони.</p>
+      </div>
+      <div class="step">
+        <div class="step__num">2</div>
+        <b>Видит профиль клиента</b>
+        <p>Сколько раз приходил, средний чек, любимые блюда, уровень лояльности, аллергии.</p>
+      </div>
+      <div class="step">
+        <div class="step__num">3</div>
+        <b>Получает топ-5 рекомендаций</b>
+        <p>То, что с наибольшей вероятностью закажет именно этот гость.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Расчёт выгоды -->
+<section class="arithm">
+  <div class="wrap arithm__inner">
+    <div>
+      <div class="eyebrow">Арифметика роста</div>
+      <h2>Посчитайте<br><em>на своих цифрах</em></h2>
+      <p class="arithm__sub">Мы не обещаем вам процент. Мы покажем арифметику — цифры подставьте свои.</p>
+    </div>
+    <div class="arithm__card">
+      <div class="arithm__watermark">10%</div>
+      <div class="arithm__head"><span>Расчёт</span><span>30 дней пилота</span></div>
+      <div class="row"><span>Средний чек</span><span>1 800 ₽</span></div>
+      <div class="row"><span>Гостей в день</span><span>120</span></div>
+      <div class="row"><span>Выручка в месяц</span><span>6 480 000 ₽</span></div>
+      <div class="row row--growth"><span>Рост среднего чека на 10%</span><span>+648 000 ₽/мес</span></div>
+      <div class="row row--cost"><span>Подписка Boostaurant</span><span>−7 000 ₽/мес</span></div>
+      <div class="row row--net"><span>Чистыми</span><span>+641 000 ₽</span></div>
+      <p class="arithm__note">10% — консервативная оценка: по отраслевым данным персональные рекомендации в HoReCa дают прирост чека 10–15%. Ваша цифра будет своей — за 30 дней пилота вы увидите её на своих гостях, а не на нашей презентации.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Условия пилота -->
+<section class="section section--dark">
+  <div class="wrap">
+    <h2>Мы берём 5 ресторанов. Условия честные</h2>
+    <div class="terms">
+      <div class="check">
+        <svg class="check__icon"><use href="#circle-check"/></svg>
+        <div><b>30 дней бесплатно</b><span>Не понравится — просто перестаёте пользоваться.</span></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#circle-check"/></svg>
+        <div><b>Взамен просим обратную связь</b><span>Честную. Разрешение назвать вас в кейсе — по вашему желанию, можно анонимно.</span></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#circle-check"/></svg>
+        <div><b>Внедряем лично, за свой счёт</b><span>Настраиваем под ваше меню, обучаем модель на ваших данных, доводим до работы.</span></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#circle-check"/></svg>
+        <div><b>Цена фиксируется навсегда</b><span>Пилотные рестораны остаются на 7 000 ₽/мес.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Цена -->
+<section class="section price">
+  <div class="wrap">
+    <div class="price__num">7 000 ₽ в месяц</div>
+    <p class="price__descr">За ресторан. Без ограничений по числу официантов и гостей.</p>
+    <div class="checks">
+      <div class="check"><svg class="check__icon"><use href="#tick"/></svg><b>Первые 30 дней — бесплатно</b></div>
+      <div class="check"><svg class="check__icon"><use href="#tick"/></svg><b>Внедрение — бесплатно</b></div>
+      <div class="check"><svg class="check__icon"><use href="#tick"/></svg><b>Для пилотных ресторанов цена фиксируется навсегда</b></div>
+    </div>
+  </div>
+</section>
+
+<section class="section--tight">
+  <div class="wrap">
+    <p class="lead">Окупается, если система принесёт вам хотя бы 4 дополнительных гостя за месяц.</p>
+  </div>
+</section>
+
+<!-- 7. Частые вопросы -->
+<section class="section section--accent">
+  <div class="wrap">
+    <h2>Частые вопросы</h2>
+    <div class="faq">
+      <details>
+        <summary>Официанты не будут этим пользоваться</summary>
+        <p>Это Telegram — он уже открыт у них на телефоне. Три кнопки, ввод номера столика, ответ за 5 секунд. Мы ничего не ставим на телефоны, не выдаём планшеты, не проводим тренинги. Если официант умеет писать в чат, он умеет пользоваться Boostaurant.</p>
+      </details>
+      <details>
+        <summary>Придётся что-то ставить и перенастраивать iiko</summary>
+        <p>Мы ничего не ставим на кассы и не меняем ни одной настройки в iiko. Вы даёте нам ключ API — мы только читаем данные. Подключение занимает один день, работа ресторана не останавливается ни на минуту.</p>
+      </details>
+      <details>
+        <summary>У меня уже есть аналитика в iiko</summary>
+        <p>Есть. И она отвечает менеджеру на вопрос «что было в прошлом месяце». Boostaurant отвечает официанту на вопрос «что предложить человеку, который сидит за столиком №5 прямо сейчас». Это не конкурирующие продукты — мы работаем поверх ваших данных iiko, а не вместо них.</p>
+      </details>
+      <details>
+        <summary>Данные гостей уйдут на сторону</summary>
+        <p>Данные хранятся в изолированной базе вашего ресторана. Модель обучается только на ваших заказах и никуда больше не попадает — у каждого ресторана она своя. Официант в боте не видит ни имени гостя, ни телефона: только историю заказов и предпочтения. Работаем в рамках 152-ФЗ.</p>
+      </details>
+      <details>
+        <summary>А если модель ошибётся и посоветует ерунду?</summary>
+        <p>Официант видит, насколько рекомендация персональная. Если система гостя не знает — она честно показывает просто популярные блюда и не притворяется, что знает больше. Решение всегда за официантом: мы подсказываем, а не командуем.</p>
+      </details>
+      <details>
+        <summary>А внедрять кто будет? У нас нет своего IT</summary>
+        <p>Внедряем мы, сами: подключаемся к вашей iiko, обучаем модель на ваших заказах, доводим до работы и остаёмся на связи. От вас нужен только ключ API и полчаса на созвон. Мы в Новосибирске — если вы тоже, приедем и настроим на месте. В любом другом городе делаем то же самое удалённо, разницы нет.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Кому подходит -->
+<section class="section">
+  <div class="wrap">
+    <h2>Кому мы точно подойдём</h2>
+    <div class="checks">
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>Ресторан с полным обслуживанием — есть официанты и посадка</b></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>Работаете на iiko (R-Keeper — на подходе)</b></div>
+      </div>
+      <div class="check">
+        <svg class="check__icon"><use href="#tick"/></svg>
+        <div><b>База от 500 постоянных гостей или от 1 000 заказов в месяц</b><span>Чем больше данных — тем точнее рекомендации.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section--tight">
+  <div class="wrap">
+    <p class="note">Если по одному из пунктов не проходите — всё равно напишите. Возможно, мы всё равно сможем быть полезны.</p>
+  </div>
+</section>
+
+<!-- 9. Финальный призыв -->
+<section class="section section--dark cta">
+  <div class="wrap">
+    <h2>Осталось 5 мест в пилоте</h2>
+    <p>Напишите в Telegram — расскажите про свой ресторан, и я отвечу, подходим ли мы вам. Если нет, скажу прямо.</p>
+    <a class="btn" href="https://t.me/Igor_Grichanov" target="_blank" rel="noopener">Написать основателю в Telegram</a>
+  </div>
+</section>
+
+</main>
+
+<!-- 10. Подвал -->
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div class="footer__logos">
+      <img src="/img/fasie.png" alt="Фонд содействия инновациям">
+      <img src="/img/platform.png" alt="Платформа университетского технологического предпринимательства">
+    </div>
+    <div class="footer__grant">
+      Проект реализован при поддержке Фонда содействия инновациям в рамках программы «Студенческий стартап» мероприятия «Платформа университетского технологического предпринимательства» федерального проекта «Технологии».
+      <div class="footer__nav"><a href="/project/">О проекте</a></div>
+    </div>
+    <div class="footer__req">
+      ООО «Бусторан»<br>
+      634024, Томская область, г. Томск,<br>Нижне-Луговая ул., д. 1, помещ. ц003<br>
+      <a href="mailto:bo_rant@mail.ru">bo_rant@mail.ru</a><br>
+      <a href="tel:+79381734313">+7 (938) 173 43 13</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

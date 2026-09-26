@@ -24,7 +24,8 @@ set -euo pipefail
 
 # --- НАСТРОЙ ЭТО -------------------------------------------------------------
 SERVER_USER=root
-SERVER_IP=CHANGE_ME            # IP от Beget
+# IP берётся из .env (SERVER_IP=…): репозиторий публичный, адрес сервера в git не храним.
+SERVER_IP=$(grep -s '^SERVER_IP=' .env | cut -d= -f2- || true)
 # -----------------------------------------------------------------------------
 
 PROJECT_NAME=boostaurant
@@ -32,8 +33,8 @@ REMOTE_DIR=/home/$PROJECT_NAME
 ARCHIVE=$PROJECT_NAME.tar.gz
 COMPOSE="docker compose -f docker-compose.prod.yml --profile bot"
 
-if [[ "$SERVER_IP" == "CHANGE_ME" ]]; then
-  echo "❌ Впиши SERVER_IP в deploy.sh (строка 19)"
+if [[ -z "$SERVER_IP" ]]; then
+  echo "❌ Впиши SERVER_IP в .env (см. .env.example)"
   exit 1
 fi
 

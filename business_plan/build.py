@@ -545,26 +545,24 @@ class Builder:
 
 
 # --------------------------------------------------------------------------
-def make_title_page(doc):
-    def centered(text, size, bold=False, after=0):
-        p = doc.add_paragraph()
-        style_run(p.add_run(text), bold=bold, size=Pt(size))
-        style_paragraph(p, first_line=Cm(0), align=WD_ALIGN_PARAGRAPH.CENTER)
-        p.paragraph_format.space_after = Pt(after)
-        return p
+# первая страница — сведения о грантополучателе в том виде, в каком их требует
+# Фонд; титульный лист с названием проекта Фонду не нужен
+TITLE_LINES = [
+    "Получатель гранта: Гричанов Игорь",
+    "Адрес: 630120, Новосибирская область, г. Новосибирск, "
+    "ул, Титова, 255/1, кв. 61",
+    "Телефон: +7 (996) 637-00-29",
+    "Договор: 1105ГССС27/106900 от 17.10.2025",
+    "Название стартап-проекта: Создание цифровой платформы предиктивной "
+    "персонализации клиентского обслуживания в общепите",
+]
 
-    for _ in range(6):
-        doc.add_paragraph()
-    centered("Бизнес-план", 22, bold=True, after=12)
-    centered("Разработка цифровой платформы на базе ассистента "
-             "с искусственным интеллектом для персонализации обслуживания "
-             "в ресторанах", 16, bold=True)
-    for _ in range(10):
-        doc.add_paragraph()
-    centered("ООО «Бусторан»", 16)
-    for _ in range(4):
-        doc.add_paragraph()
-    centered("Томск 2026 г.", 16)
+
+def make_title_page(doc):
+    for line in TITLE_LINES:
+        p = doc.add_paragraph()
+        style_run(p.add_run(line), bold=True)
+        style_paragraph(p)
 
 
 def make_toc_page(doc):
@@ -623,7 +621,7 @@ def add_page_numbers(section, start):
 
     section.footer.is_linked_to_previous = False
     p = section.footer.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = p.add_run()
     r._element.append(_fld("begin"))
@@ -673,7 +671,11 @@ def main():
             s2.page_width, s2.page_height = Cm(21.0), Cm(29.7)
             s2.left_margin, s2.right_margin = Cm(3.0), Cm(1.5)
             s2.top_margin, s2.bottom_margin = Cm(2.0), Cm(2.0)
-        add_page_numbers(body, start=3)
+        # нумерация с первой страницы: поле ставится в первой секции,
+        # последующие наследуют колонтитул и продолжают счёт
+        add_page_numbers(doc.sections[0], start=1)
+        for s2 in (doc.sections[1], body):
+            s2.footer.is_linked_to_previous = True
 
     builder = Builder(doc)
     # предварительный проход: имена закладок должны быть известны до отрисовки

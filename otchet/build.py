@@ -21,7 +21,7 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt
 
 ROOT = Path(__file__).resolve().parent
-TEMPLATE = ROOT.parent / "Отчет.docx"
+TEMPLATE = ROOT / "Отчет.docx"
 OUTPUT = ROOT.parent / "Отчет_заполненный.docx"
 
 SECTIONS = ["1.1_сайт.md", "1.2_база_данных.md", "1.3_архитектура.md",
@@ -130,6 +130,11 @@ def parse_md(path: Path):
             blocks.append(("caption", ln.strip("*")))
             i += 1
             continue
+        # подпись к таблице: *Таблица N — ...* (ставится перед таблицей)
+        if ln.startswith("*Таблица") and ln.endswith("*"):
+            blocks.append(("tcaption", ln.strip("*")))
+            i += 1
+            continue
         # таблица
         if ln.startswith("|"):
             rows = []
@@ -169,6 +174,7 @@ class Builder:
         self.doc = doc
         self.fig_no = 0          # сквозная нумерация рисунков
         self.fig_map = {}        # путь → номер (подпись берёт номер отсюда)
+        self.tbl_no = 0          # сквозная нумерация таблиц
 
     def render(self, blocks, anchor):
         """Вставляет блоки после anchor (абзац-плейсхолдер). Возвращает последний элемент."""
@@ -241,6 +247,18 @@ class Builder:
         p.paragraph_format.space_after = Pt(12)
         return p._element
 
+    def _tcaption(self, text, cur):
+        """Подпись таблицы — над таблицей, по левому краю (ГОСТ 7.32)."""
+        self.tbl_no += 1
+        text = re.sub(r"^Таблица\s+\d+", f"Таблица {self.tbl_no}", text.strip())
+        p = self.doc.add_paragraph()
+        cur.addnext(p._element)
+        style_run(p.add_run(text.replace("—", "–")))
+        style_paragraph(p, first_line=Cm(0), align=WD_ALIGN_PARAGRAPH.LEFT)
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.keep_with_next = True
+        return p._element
+
     def _table(self, rows, cur):
         if not rows:
             return cur
@@ -303,6 +321,33 @@ def normalize_headings(doc):
     return restyled, broken
 
 
+def clear_section_body(holder, doc):
+    """Удалить прежнее содержимое раздела: от плейсхолдера до следующего заголовка.
+
+    Шаблон — это уже собранная версия отчёта, отправленная в Фонд, поэтому под
+    каждым плейсхолдером «На данном этапе …» лежит текст прошлой сборки. Без
+    очистки новое содержимое встало бы рядом с ним, а не вместо него.
+    """
+    body = doc.element.body
+    children = list(body)
+    start = children.index(holder._element)
+
+    removed = 0
+    for el in children[start + 1:]:
+        if el.tag == qn("w:p"):
+            style = el.find(qn("w:pPr"))
+            style = None if style is None else style.find(qn("w:pStyle"))
+            if style is not None and style.get(qn("w:val"), "").startswith("Heading"):
+                break
+            # разрыв раздела несёт настройки колонтитулов — оставить
+            if el.find(qn("w:pPr")) is not None \
+                    and el.find(qn("w:pPr")).find(qn("w:sectPr")) is not None:
+                break
+        body.remove(el)
+        removed += 1
+    return removed
+
+
 def fix_page_numbering(doc):
     body = doc.element.body
     sect_prs = body.findall(qn("w:sectPr")) + [
@@ -319,7 +364,14 @@ def fix_page_numbering(doc):
     for idx, sect in enumerate(sect_prs):
         pg = sect.find(qn("w:pgNumType"))
         if idx == 0:
-            continue                       # первая секция: нумерация со 2-й страницы
+            # требование Фонда: первая страница отчёта (реферат) имеет номер 2
+            if pg is None:
+                pg = OxmlElement("w:pgNumType")
+                # порядок дочерних элементов sectPr задан схемой: после pgMar
+                mar = sect.find(qn("w:pgMar"))
+                (mar.addnext(pg) if mar is not None else sect.append(pg))
+            pg.set(qn("w:start"), "2")
+            continue
         if pg is not None:
             sect.remove(pg)                # остальные — продолжают счёт
             fixed += 1
@@ -339,9 +391,10 @@ def main():
     builder = Builder(doc)
     for holder, name in zip(holders, SECTIONS):
         blocks = parse_md(ROOT / name)
+        dropped = clear_section_body(holder, doc)      # текст прошлой сборки
         builder.render(blocks, holder._element)
         holder._element.getparent().remove(holder._element)   # убрать плейсхолдер
-        print(f"  {name}: {len(blocks)} блоков")
+        print(f"  {name}: {len(blocks)} блоков (удалено прежних: {dropped})")
 
     restyled, broken = normalize_headings(doc)
     print(f"\nЗаголовки: приведено к Heading2 — {restyled}, добавлено разрывов страниц — {broken}")
