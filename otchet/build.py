@@ -1,7 +1,9 @@
-"""Сборка Отчёта: подстановка разделов 1.1–1.5 в шаблон Отчет.docx.
+"""Сборка Отчёта: подстановка разделов 1.1–1.5 из md в Отчет_заполненный.docx.
 
-Заменяет абзацы-плейсхолдеры «На данном этапе …» содержимым md-файлов,
-приводит заголовки разделов к единому уровню и чинит нумерацию страниц.
+Содержимое каждого раздела заменяется целиком — от заголовка «1.N …» до
+следующего заголовка; остальной документ (реферат, термины, введение,
+заключение) сохраняется. Файл одновременно и шаблон, и результат, поэтому
+перед сборкой создаётся копия Отчет_заполненный.bak.docx.
 
     python otchet/build.py            → Отчет_заполненный.docx
 
@@ -21,8 +23,8 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt
 
 ROOT = Path(__file__).resolve().parent
-TEMPLATE = ROOT / "Отчет.docx"
-OUTPUT = ROOT.parent / "Отчет_заполненный.docx"
+TEMPLATE = OUTPUT = ROOT.parent / "Отчет_заполненный.docx"
+BACKUP = ROOT.parent / "Отчет_заполненный.bak.docx"
 
 SECTIONS = ["1.1_сайт.md", "1.2_база_данных.md", "1.3_архитектура.md",
             "1.4_интеграция_iiko.md", "1.5_платформа.md"]
@@ -322,11 +324,11 @@ def normalize_headings(doc):
 
 
 def clear_section_body(holder, doc):
-    """Удалить прежнее содержимое раздела: от плейсхолдера до следующего заголовка.
+    """Удалить прежнее содержимое раздела: от заголовка до следующего заголовка.
 
-    Шаблон — это уже собранная версия отчёта, отправленная в Фонд, поэтому под
-    каждым плейсхолдером «На данном этапе …» лежит текст прошлой сборки. Без
-    очистки новое содержимое встало бы рядом с ним, а не вместо него.
+    Шаблоном служит собранная версия отчёта, поэтому под каждым заголовком
+    лежит текст прошлой сборки. Без очистки новое содержимое встало бы рядом
+    с ним, а не вместо него.
     """
     body = doc.element.body
     children = list(body)
@@ -378,26 +380,57 @@ def fix_page_numbering(doc):
     return len(sect_prs), fixed
 
 
+def update_abstract_counts(doc, figures, tables):
+    """Обновить «N с., N рис., N табл.» в реферате.
+
+    Число страниц не пересчитывается: его определяет Word при вёрстке, и
+    python-docx его не знает. Правится только то, что известно точно.
+    """
+    for p in doc.paragraphs[:10]:
+        text = p.text.strip()
+        if not re.match(r"^Отчёт\s+\d+\s*с\.", text):
+            continue
+        new = re.sub(r"\d+\s*рис\.", f"{figures} рис.", text)
+        new = re.sub(r"\d+\s*табл\.", f"{tables} табл.", new)
+        if new == text:
+            return text
+        # строка разбита на несколько runs («4» и «рис.» — в разных), поэтому
+        # текст собирается в первый, остальные очищаются: оформление у них одно
+        p.runs[0].text = new
+        for run in p.runs[1:]:
+            run.text = ""
+        return new
+    return None
+
+
 # --------------------------------------------------------------------------
 def main():
-    shutil.copy(TEMPLATE, OUTPUT)
-    doc = Document(OUTPUT)
+    # Шаблон и результат — один и тот же файл: разделы пересобираются поверх
+    # предыдущей сборки, остальной документ (реферат, введение, заключение,
+    # ручная правка) сохраняется. Копия на случай сбоя посреди сборки.
+    shutil.copy(TEMPLATE, BACKUP)
+    doc = Document(TEMPLATE)
 
-    # плейсхолдеры «На данном этапе …» в порядке следования
-    holders = [p for p in doc.paragraphs if p.text.strip().startswith("На данном этапе")]
+    # якорь раздела — его заголовок «1.N …»: привязка к тексту первого абзаца
+    # ломалась при каждой правке формулировки
+    holders = [p for p in doc.paragraphs if re.match(r"^1\.\d\s", p.text.strip())]
     if len(holders) != len(SECTIONS):
-        raise SystemExit(f"Ожидалось {len(SECTIONS)} плейсхолдеров, найдено {len(holders)}")
+        found = "\n".join(f"    {p.text.strip()[:60]}" for p in holders)
+        raise SystemExit(
+            f"Ожидалось {len(SECTIONS)} заголовков разделов, найдено {len(holders)}:\n{found}")
 
     builder = Builder(doc)
     for holder, name in zip(holders, SECTIONS):
         blocks = parse_md(ROOT / name)
         dropped = clear_section_body(holder, doc)      # текст прошлой сборки
-        builder.render(blocks, holder._element)
-        holder._element.getparent().remove(holder._element)   # убрать плейсхолдер
+        builder.render(blocks, holder._element)        # заголовок остаётся на месте
         print(f"  {name}: {len(blocks)} блоков (удалено прежних: {dropped})")
 
     restyled, broken = normalize_headings(doc)
     print(f"\nЗаголовки: приведено к Heading2 — {restyled}, добавлено разрывов страниц — {broken}")
+
+    counts = update_abstract_counts(doc, builder.fig_no, builder.tbl_no)
+    print(f"\nРеферат: {counts or 'строка «Отчёт … с., … рис., … табл.» не найдена'}")
 
     total, fixed = fix_page_numbering(doc)
     print(f"\nНумерация страниц: секций {total}, снят принудительный старт в {fixed}")
