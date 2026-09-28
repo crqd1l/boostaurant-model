@@ -12,7 +12,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-export PATH="$HOME/yandex-cloud/bin:$PATH"
+export PATH="$HOME/.local/share/yandex-cloud/bin:$PATH"
 
 BUCKET=s3://www.boostaurant.ru
 

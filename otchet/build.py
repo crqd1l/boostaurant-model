@@ -380,6 +380,53 @@ def fix_page_numbering(doc):
     return len(sect_prs), fixed
 
 
+def pf_align(p):
+    """Фактическое выравнивание абзаца с учётом наследования от стиля."""
+    if p.paragraph_format.alignment is not None:
+        return p.paragraph_format.alignment
+    style = p.style
+    while style is not None:
+        if style.paragraph_format.alignment is not None:
+            return style.paragraph_format.alignment
+        style = style.base_style
+    return None
+
+
+def normalize_body_format(doc):
+    """Привести абзацы вне разделов 1.1–1.5 к отступу 1,25 см и выравниванию по ширине.
+
+    Собранные разделы форматирует style_paragraph, но шаблонная часть (введение,
+    заключение, реферат) размечалась вручную: встречались отступ 0,5 дюйма
+    (1,27 см) и списки, наследующие выравнивание по левому краю от стиля
+    List Paragraph. Заголовки, подписи и подзаголовки не затрагиваются.
+    """
+    fixed_ind = fixed_align = 0
+    for p in doc.paragraphs:
+        text = p.text.strip()
+        if not text or p.style.name.startswith("Heading") or p.style.name == "Caption":
+            continue
+        if text.startswith(("Рисунок", "Таблица")):
+            continue
+        # подзаголовок внутри раздела — жирный, без отступа, по левому краю
+        if p.runs and all(r.bold for r in p.runs if r.text.strip()):
+            continue
+        # заголовки вроде «РЕФЕРАТ» размечены не стилем, а выравниванием по центру
+        if pf_align(p) == WD_ALIGN_PARAGRAPH.CENTER:
+            continue
+        pf = p.paragraph_format
+        # Word округляет отступ при сохранении: 1,25 см встречается и как
+        # 450000, и как 450215 EMU. Допуск в 0,01 см отсекает это расхождение,
+        # иначе «исправлением» оказывается весь текст документа.
+        fi = pf.first_line_indent
+        if fi is None or abs(fi - FIRST_LINE) > 3600:
+            pf.first_line_indent = FIRST_LINE
+            fixed_ind += 1
+        if pf_align(p) != WD_ALIGN_PARAGRAPH.JUSTIFY:
+            pf.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            fixed_align += 1
+    return fixed_ind, fixed_align
+
+
 def update_abstract_counts(doc, figures, tables):
     """Обновить «N с., N рис., N табл.» в реферате.
 
@@ -428,6 +475,9 @@ def main():
 
     restyled, broken = normalize_headings(doc)
     print(f"\nЗаголовки: приведено к Heading2 — {restyled}, добавлено разрывов страниц — {broken}")
+
+    ind, align = normalize_body_format(doc)
+    print(f"\nФорматирование: поправлен отступ — {ind}, выравнивание — {align}")
 
     counts = update_abstract_counts(doc, builder.fig_no, builder.tbl_no)
     print(f"\nРеферат: {counts or 'строка «Отчёт … с., … рис., … табл.» не найдена'}")
